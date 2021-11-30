@@ -14,5 +14,5 @@ git clone https://github.com/campus-digital-grenoble/JS_sortingAlgorithm.git .
 ### Lancer un serveur
 
 ```
-php -S localhost:8123
+utiliser LiveServer
 ```
