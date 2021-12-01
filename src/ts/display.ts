@@ -1,62 +1,59 @@
-import { Operations } from "./enums/enums";
-import { cityData } from "./types/types";
 const d3 = require("d3");
+import { Operations } from "./enums/enums";
+import { CityData } from "./types/types";
 
 export class Display {
-  COMPARE_COLOR: string = "#00f";
-  SWAP_COLOR: string = "#0f0";
+  COMPARE_COLOR: string = "#61CE70";
+  SWAP_COLOR: string = "#EF2961";
+  /** @todo */
+  PIVOT_COLOR: string = "#3273DC";
   DEFAULT_COLOR: string = "#000";
 
   prev1 = null;
   prev2 = null;
-  displayBuffer: [] = [];
 
   compareCount: number;
   swapCount: number;
   compareCountElement: HTMLSpanElement;
   swapCountElement: HTMLSpanElement;
-  csvData: cityData[];
+  csvData: CityData[];
 
   constructor() {
-    this.compareCountElement = document.querySelector("#compare-count");
-    this.swapCountElement = document.querySelector("#swap-count");
+    this.compareCountElement = document.querySelector("#compareCount");
+    this.swapCountElement = document.querySelector("#swapCount");
   }
 
   incrementCount(countable: Operations) {
     if (countable === Operations.COMPARE) {
       this.compareCount++;
       this.compareCountElement.innerHTML = String(this.compareCount);
-      if (compareCountElement.classList.contains("d-none"))
-        compareCountElement.classList.remove("d-none");
-    } else if (countable === Operations.SWAP) {
+    }
+    if (countable === Operations.SWAP) {
       this.swapCount++;
       this.swapCountElement.innerHTML = String(this.swapCount);
-      if (compareCountElement.classList.contains("d-none"))
-        compareCountElement.classList.remove("d-none");
     }
   }
 
-  swap_attr(p1, p2, attr) {
+  swapAttr(p1, p2, attr) {
     var tmp = p1.attr(attr);
     p1.attr(attr, p2.attr(attr));
     p2.attr(attr, tmp);
   }
 
-  swap_rect(p1, p2) {
-    this.swap_attr(p1, p2, "x");
-    this.swap_attr(p1, p2, "id");
+  swapRect(p1, p2) {
+    this.swapAttr(p1, p2, "x");
+    this.swapAttr(p1, p2, "id");
   }
 
-  getRect(i) {
+  getRect(i: number) {
     return d3.select("rect#c" + i);
   }
 
-  oneStep() {
-    if (this.displayBuffer.length === 0) {
+  oneStep(action: [Operations, number, number, boolean?]) {
+    if (action.length < 3) {
       return;
     }
 
-    let action: Operations[] = this.displayBuffer.shift();
     let i = this.getRect(action[1]);
     let j = this.getRect(action[2]);
     if (this.prev1) {
@@ -71,24 +68,32 @@ export class Display {
     if (action[0] === Operations.COMPARE) {
       i.attr("fill", this.COMPARE_COLOR);
       j.attr("fill", this.COMPARE_COLOR);
-    } else if (action[0] === Operations.SWAP) {
-      this.swap_rect(i, j);
+    }
+    if (action[0] === Operations.SWAP) {
+      this.swapRect(i, j);
       i.attr("fill", this.SWAP_COLOR);
       j.attr("fill", this.SWAP_COLOR);
     }
+    if (this.csvData[action[1]].is_pivot) {
+      i.attr("fill", this.PIVOT_COLOR);
+    }
+    if (this.csvData[action[2]].is_pivot) {
+      j.attr("fill", this.PIVOT_COLOR);
+    }
+
     this.incrementCount(action[0]);
   }
 
   setupDisplay() {
     const w: number = 800;
     const h: number = 400;
-    var xScale = d3
+    const xScale = d3
       .scaleLinear()
       .domain([0, this.csvData.length])
       .range([0, w]);
-    var yScale = d3
+    const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(this.csvData, (d: cityData) => d.dist)])
+      .domain([0, d3.max(this.csvData, (d: CityData) => d.dist)])
       .range([0, h]);
 
     d3.selectAll("svg > *").remove();
@@ -116,33 +121,26 @@ export class Display {
       .data(this.csvData)
       .enter()
       .append("rect")
-      .attr("id", function (i, j) {
+      .attr("id", (i: CityData, j: number) => {
         return "c" + j;
       })
       .attr("width", xScale(1))
-      .attr("height", function (i) {
-        return yScale(i.dist);
-      })
-      .attr("x", function (i, j) {
+      .attr("height", (i: CityData) => yScale(i.dist))
+      .attr("x", (i: number, j: number) => {
         return xScale(j);
       })
-      .attr("y", function (i, j) {
-        return h - yScale(i.dist);
-      })
-      .attr("fill", function (i) {
-        return i.dist;
-      })
-      .attr("str", function (i) {
-        return i.str;
-      })
-      .on("mouseover", function (d) {
+      .attr("y", (i: CityData, j: number) => h - yScale(i.dist))
+      .attr("fill", (i: CityData) => i.dist)
+      .attr("str", (i: CityData) => i.str)
+      .on("mouseover", (e: MouseEvent, i: CityData) => {
         div.transition().duration(200).style("opacity", 0.9);
         div
-          .html(d.str)
-          .style("left", d3.event.pageX + "px")
-          .style("top", d3.event.pageY - 28 + "px");
+          .html(i.str)
+          .style("left", e.clientX + "px")
+          .style("top", e.clientY - 28 + "px")
+          .style("color", "white");
       })
-      .on("mouseout", function (d) {
+      .on("mouseout", (d: CityData) => {
         div.transition().duration(500).style("opacity", 0);
       });
 
@@ -157,8 +155,8 @@ export class Display {
     resize_canvas();
   }
 
-  setData(data: cityData[]) {
-    function num_dptIsntNAN(elt) {
+  setData(data: CityData[]) {
+    function num_dptIsntNAN(elt: CityData): boolean {
       return !(isNaN(elt.dist) || elt.latitude == 0 || elt.longitude == 0);
     }
 

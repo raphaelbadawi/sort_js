@@ -1,0 +1,26 @@
+@import "variables";
+
+#drop_zone {
+  border: 2px dashed #bbb;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 25px;
+  text-align: center;
+  font: 20pt bold "Vollkorn";
+  color: #bbb;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 200px;
+  height: max-content;
+  padding: 4px;
+  font: 12px sans-serif;
+  background: $primary;
+  color: white;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
