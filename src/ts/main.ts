@@ -4,16 +4,11 @@ import { CityData } from "./types/types";
 import { Display } from "./display";
 import { Algos } from "./algos";
 import { AlgoNames } from "./enums/enums";
+import { toggleNotificationBySelect } from "./utils/utils";
 
 // Toggle notifications depending on selected algo
-document.querySelector("#algo-select").addEventListener("change", ({ target }) => {
-  const value: AlgoNames = (target as HTMLSelectElement).options[(target as HTMLSelectElement).selectedIndex].value as AlgoNames;
-  if (value == AlgoNames.QUICK || value == AlgoNames.QUICK3) {
-    document.querySelector("#quickSortNotification").classList.remove("is-invisible");
-    return;
-  }
-  document.querySelector("#quickSortNotification").classList.add("is-invisible");
-})
+window.addEventListener("DOMContentLoaded", () => toggleNotificationBySelect("algo-select", "quickSortNotification"));
+document.querySelector("#algo-select").addEventListener("change", () =>  toggleNotificationBySelect("algo-select", "quickSortNotification"));
 
 // Launch selected algo with its associated display on click
 document.querySelector("#start-btn").addEventListener("click", () => {
