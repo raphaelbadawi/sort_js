@@ -1,11 +1,11 @@
 const d3 = require("d3");
+import { DataHolder } from "./data_holder";
 import { Operations } from "./enums/enums";
-import { CityData } from "./types/types";
+import { CityData, CityDisplayData } from "./types/types";
 
-export class Display {
+export class Display extends DataHolder {
   COMPARE_COLOR: string = "#61CE70";
   SWAP_COLOR: string = "#EF2961";
-  /** @todo */
   PIVOT_COLOR: string = "#3273DC";
   DEFAULT_COLOR: string = "#000";
 
@@ -16,9 +16,9 @@ export class Display {
   swapCount: number;
   compareCountElement: HTMLSpanElement;
   swapCountElement: HTMLSpanElement;
-  csvData: CityData[];
 
   constructor() {
+    super();
     this.compareCountElement = document.querySelector("#compareCount");
     this.swapCountElement = document.querySelector("#swapCount");
   }
@@ -49,7 +49,7 @@ export class Display {
     return d3.select("rect#c" + i);
   }
 
-  oneStep(action: [Operations, number, number, boolean?]) {
+  oneStep(action: [Operations, number, number]) {
     if (action.length < 3) {
       return;
     }
@@ -74,10 +74,10 @@ export class Display {
       i.attr("fill", this.SWAP_COLOR);
       j.attr("fill", this.SWAP_COLOR);
     }
-    if (this.csvData[action[1]].is_pivot) {
+    if ((this.csvData[action[1]] as CityDisplayData).is_pivot) {
       i.attr("fill", this.PIVOT_COLOR);
     }
-    if (this.csvData[action[2]].is_pivot) {
+    if ((this.csvData[action[2]] as CityDisplayData).is_pivot) {
       j.attr("fill", this.PIVOT_COLOR);
     }
 
@@ -153,13 +153,5 @@ export class Display {
       mainCanvas.style.width = canvasDiv.clientWidth + "px";
     };
     resize_canvas();
-  }
-
-  setData(data: CityData[]) {
-    function num_dptIsntNAN(elt: CityData): boolean {
-      return !(isNaN(elt.dist) || elt.latitude == 0 || elt.longitude == 0);
-    }
-
-    this.csvData = data.filter(num_dptIsntNAN);
   }
 }

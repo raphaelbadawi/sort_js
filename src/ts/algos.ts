@@ -1,11 +1,11 @@
 import { Display } from "./display";
 import { AlgoNames, Operations } from "./enums/enums";
+import { CityDisplayData } from "./types/types";
 import { sleep } from "./utils/utils";
 
 export class Algos {
   INTERVAL: number;
   display: Display;
-  incomingOperations: ((any) => void)[] = [];
 
   // Converts from degrees to radians
   toRadians(numberInDegress: number) {
@@ -244,7 +244,7 @@ export class Algos {
   }
 
   async partition(start: number, end: number) {
-    const pivot = this.display.csvData[end];
+    const pivot = this.display.csvData[end] as CityDisplayData;
     const pivotValue = pivot.dist;
     pivot.is_pivot = true;
     let pivotIndex = start;

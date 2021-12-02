@@ -7,5 +7,8 @@ export interface CityData {
   codes_postaux: string;
   dist: number;
   str: string,
-  is_pivot?: boolean,
+}
+
+export interface CityDisplayData extends CityData {
+  is_pivot?: boolean;
 }
